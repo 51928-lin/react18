@@ -1,8 +1,8 @@
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { FunctionComponent, HostComponent, HostRoot, HostText, IndeterminateComponent } from "./ReactWorkTags";
 import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
-
+import {renderWithHooks} from 'react-reconciler/src/ReactFiberHooks'
 /**
  * 根据新的虚拟DOM生成新的Fiber链表
  * 对于fiber节点中children是一个{children: text}文本，workInProgress.child = null
@@ -54,15 +54,21 @@ function updateHostComponent(current, workInProgress) {
   return workInProgress.child;
 }
 
+function mountIndeterminateComponent(current, workInProgress, Component){
+  const props = workInProgress.pendingProps;
+  const value = renderWithHooks(current, workInProgress,Component,props);
+  workInProgress.tag = FunctionComponent
+  reconcileChildren(current, workInProgress, value)
+  return workInProgress.child
+}
+
 /**
- * 开始根据新的虚拟DOM构建新的Fiber子链表，此时虚拟dom在队列中，此时新旧当中都有相同的任务队列，因为初始化的时候旧的赋值给了新的
- * 初始化：current.updateQueue === workInProgress.updateQueue 为true
- * @param {FiberNode} current - 老的Fiber树根节点
- * @param {FiberNode} workInProgress - 新的Fiber树根节点
- * @returns {FiberNode|null} 新的子Fiber节点或者null
+ *  1. current= rootFiber, workInProgress = rootFiber, 但是current === workInProgress => false;
  */
 export function beginWork(current, workInProgress) {
   switch (workInProgress.tag) {
+    case IndeterminateComponent:
+      return mountIndeterminateComponent(current, workInProgress, workInProgress.type)
     case HostRoot:
       // 这里返回的是hostroot的fiber节点，也就是新rootfiber节点
       return updateHostRoot(current, workInProgress);

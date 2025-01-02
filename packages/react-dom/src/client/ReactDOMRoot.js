@@ -38,6 +38,7 @@ ReactDOMRoot.prototype.render = function (children) {
  * 然后将这个Fiber根节点传入ReactDOMRoot构造函数，创建一个ReactDOMRoot实例对象，并返回。
  */
 export function createRoot(container) {
+  
   const root = createContainer(container);
   return new ReactDOMRoot(root);
 }

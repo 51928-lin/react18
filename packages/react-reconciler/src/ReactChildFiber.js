@@ -135,7 +135,7 @@ function createChildReconciler(shouldTrackSideEffects) {
   return reconcileChildFibers;
 }
 
-//有老的父fiber，更新的时候用这个，对于初始化而言，有current的时候
+// current存在时候
 export const reconcileChildFibers = createChildReconciler(true);
 //如果没有老父fiber,初次挂载的时候用这个
 export const mountChildFibers = createChildReconciler(false);
